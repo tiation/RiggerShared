@@ -2,6 +2,28 @@
 
 🏗️ **A ChaseWhiteRabbit NGO Initiative**
 
+## 📍 Repository Location & Structure
+
+**Current Location**: `/Users/tiaastor/Github/tiation-repos/RiggerShared/`
+
+This repository is part of the **Tiation Enterprise Repository Structure**, specifically designed to house **ChaseWhiteRabbit NGO's** technology initiatives following enterprise-grade development practices.
+
+### 🏗️ Enterprise Ecosystem
+- **Repository Collection**: [Enterprise Repository Index](../ENTERPRISE_REPOSITORY_INDEX.md)
+- **Connected Projects**: [RiggerConnect-web](../RiggerConnect-web/), [RiggerConnect-android](../RiggerConnect-android/), [RiggerConnect-ios](../RiggerConnect-ios/)
+- **Hub Applications**: [RiggerHub-web](../RiggerHub-web/), [RiggerHub-android](../RiggerHub-android/), [RiggerHub-ios](../RiggerHub-ios/)
+- **Backend Services**: [RiggerBackend](../RiggerBackend/)
+
+### 🌟 NGO Integration
+As a **ChaseWhiteRabbit NGO Initiative**, this project adheres to:
+- ✅ **Enterprise-grade development practices**
+- ✅ **Ethical technology standards**
+- ✅ **Cross-platform compatibility**
+- ✅ **DevOps best practices with CI/CD**
+- ✅ **Modular architecture principles**
+
+## 🎯 Library Overview
+
 RiggerShared houses pivotal shared libraries and components forming the backbone of Rigger's entire ecosystem. These standardized modules optimize resource utilization and simplify consistent functionality across RiggerConnect, RiggerHub, and related platforms.
 
 ## 🎯 Project Purpose
