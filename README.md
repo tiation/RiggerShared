@@ -1,10 +1,23 @@
-# RiggerShared
+# RiggerShared Libraries
 
-Enterprise-grade shared libraries and components for the Rigger ecosystem.
+🏗️ **A ChaseWhiteRabbit NGO Initiative**
 
-## ChaseWhiteRabbit NGO Integration
+RiggerShared houses pivotal shared libraries and components forming the backbone of Rigger's entire ecosystem. These standardized modules optimize resource utilization and simplify consistent functionality across RiggerConnect, RiggerHub, and related platforms.
 
-This project is developed in support of ChaseWhiteRabbit NGO's mission to enhance safety and efficiency in industrial operations.
+## 🎯 Project Purpose
+
+As an integral component of ChaseWhiteRabbit NGO's strategic initiatives, RiggerShared epitomizes:
+
+- **Consistency** through standardized shared modules
+- **Efficiency improvement** efforts across platforms
+- **Simplified** implementation for future projects
+
+## 🚀 Technology Stack
+
+- **Languages**: Kotlin, Swift
+- **Platforms**: Android, iOS, Web  
+
+## Project Structure
 
 ## Project Structure
 
