@@ -2,15 +2,21 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, staging ]
   pull_request:
     branches: [ main, develop ]
   release:
     types: [ published ]
+  schedule:
+    - cron: '0 6 * * *'  # Daily security scans
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   DOCKER_REGISTRY: docker.sxc.codes
+  DOCKER_HOST: docker.sxc.codes
+  GITLAB_REGISTRY: gitlab.sxc.codes
+  HELM_REGISTRY: helm.sxc.codes
+  MONITORING_HOST: grafana.sxc.codes
 
 jobs:
   test:
@@ -75,10 +81,28 @@ jobs:
     environment: staging
     
     steps:
-    - name: Deploy to Staging
+    - uses: actions/checkout@v4
+    
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.HOSTINGER_SSH_KEY }}
+    
+    - name: Deploy to Docker VPS (Staging)
       run: |
-        echo "Deploying to staging environment..."
-        # Add deployment commands here
+        ssh -o StrictHostKeyChecking=no root@docker.tiation.net << 'EOF'
+          docker pull ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}:latest
+          docker stop riggershared-staging || true
+          docker rm riggershared-staging || true
+          docker run -d --name riggershared-staging -p 3001:3000 \
+            --restart unless-stopped \
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}:latest
+        EOF
+    
+    - name: Health Check
+      run: |
+        sleep 30
+        curl -f http://docker.tiation.net:3001/health || exit 1
 
   deploy-production:
     needs: build
@@ -87,7 +111,58 @@ jobs:
     environment: production
     
     steps:
-    - name: Deploy to Production
+    - uses: actions/checkout@v4
+    
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.HOSTINGER_SSH_KEY }}
+    
+    - name: Deploy to Production VPS
       run: |
-        echo "Deploying to production environment..."
-        # Add deployment commands here
+        ssh -o StrictHostKeyChecking=no root@docker.sxc.codes << 'EOF'
+          docker pull ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}:latest
+          docker stop riggershared-prod || true
+          docker rm riggershared-prod || true
+          docker run -d --name riggershared-prod -p 3000:3000 \
+            --restart unless-stopped \
+            --memory=512m \
+            --cpus=1.0 \
+            -e NODE_ENV=production \
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}:latest
+        EOF
+    
+    - name: Production Health Check
+      run: |
+        sleep 45
+        curl -f http://docker.sxc.codes:3000/health || exit 1
+        curl -f http://docker.sxc.codes:3000/metrics || exit 1
+    
+    - name: Update Helm Chart
+      run: |
+        ssh -o StrictHostKeyChecking=no root@helm.sxc.codes << 'EOF'
+          cd /opt/helm-charts/riggershared
+          helm upgrade riggershared . --set image.tag=${{ github.sha }} \
+            --set environment=production \
+            --namespace=production
+        EOF
+    
+    - name: Send Monitoring Alert
+      run: |
+        curl -X POST "http://grafana.sxc.codes:3000/api/annotations" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${{ secrets.GRAFANA_API_KEY }}" \
+          -d '{
+            "text": "RiggerShared deployed to production",
+            "tags": ["deployment", "production", "riggershared"],
+            "time": '$(date +%s000)'
+          }'
+    
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: '🚀 RiggerShared v${{ github.sha }} deployed to production successfully!'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: always()

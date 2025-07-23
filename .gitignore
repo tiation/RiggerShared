@@ -108,5 +108,8 @@ temp/
 # ChaseWhiteRabbit NGO specific
 .env
 .env.local
-.env.production
 .env.staging
+
+# Environment files (keep templates, ignore local overrides)
+# .env.development and .env.production are committed as templates
+# but .env.local should never be committed

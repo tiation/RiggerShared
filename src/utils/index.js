@@ -1,1 +1,473 @@
-import { v4 as uuidv4 } from 'uuid';\nimport { ValidationPatterns } from '../types/index.js';\n\n/**\n * String utilities\n */\nexport const StringUtils = {\n  // Generate a random string of specified length\n  generateRandomString: (length = 10) => {\n    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';\n    let result = '';\n    for (let i = 0; i < length; i++) {\n      result += chars.charAt(Math.floor(Math.random() * chars.length));\n    }\n    return result;\n  },\n\n  // Convert string to slug (URL-friendly)\n  toSlug: (str) => {\n    return str\n      .toLowerCase()\n      .trim()\n      .replace(/[^\\w\\s-]/g, '') // Remove non-word chars\n      .replace(/[\\s_-]+/g, '-') // Replace spaces and underscores with hyphens\n      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens\n  },\n\n  // Capitalize first letter of each word\n  toTitleCase: (str) => {\n    return str.replace(/\\w\\S*/g, (txt) => \n      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()\n    );\n  },\n\n  // Truncate string with ellipsis\n  truncate: (str, maxLength = 100, suffix = '...') => {\n    if (str.length <= maxLength) return str;\n    return str.substr(0, maxLength - suffix.length) + suffix;\n  },\n\n  // Mask sensitive information (like email, phone)\n  maskEmail: (email) => {\n    const [localPart, domain] = email.split('@');\n    const maskedLocal = localPart.charAt(0) + '*'.repeat(localPart.length - 2) + localPart.slice(-1);\n    return `${maskedLocal}@${domain}`;\n  },\n\n  maskPhone: (phone) => {\n    return phone.replace(/(\\d{2})(\\d{4})(\\d{4})/, '$1****$3');\n  },\n};\n\n/**\n * Date utilities\n */\nexport const DateUtils = {\n  // Format date to Australian format (DD/MM/YYYY)\n  formatAustralianDate: (date) => {\n    const d = new Date(date);\n    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;\n  },\n\n  // Get relative time (e.g., \"2 hours ago\")\n  getRelativeTime: (date) => {\n    const now = new Date();\n    const diff = now - new Date(date);\n    const seconds = Math.floor(diff / 1000);\n    const minutes = Math.floor(seconds / 60);\n    const hours = Math.floor(minutes / 60);\n    const days = Math.floor(hours / 24);\n\n    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;\n    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;\n    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;\n    return 'Just now';\n  },\n\n  // Check if date is business day (Mon-Fri)\n  isBusinessDay: (date) => {\n    const day = new Date(date).getDay();\n    return day >= 1 && day <= 5;\n  },\n\n  // Add business days to a date\n  addBusinessDays: (date, days) => {\n    const result = new Date(date);\n    let addedDays = 0;\n    \n    while (addedDays < days) {\n      result.setDate(result.getDate() + 1);\n      if (DateUtils.isBusinessDay(result)) {\n        addedDays++;\n      }\n    }\n    \n    return result;\n  },\n};\n\n/**\n * Validation utilities\n */\nexport const ValidationUtils = {\n  // Validate email format\n  isValidEmail: (email) => {\n    return ValidationPatterns.EMAIL.test(email);\n  },\n\n  // Validate Australian phone number\n  isValidAustralianPhone: (phone) => {\n    return ValidationPatterns.PHONE_AU.test(phone);\n  },\n\n  // Validate Australian postcode\n  isValidPostcode: (postcode) => {\n    return ValidationPatterns.POSTCODE_AU.test(postcode);\n  },\n\n  // Validate ABN (Australian Business Number)\n  isValidABN: (abn) => {\n    if (!ValidationPatterns.ABN.test(abn)) return false;\n    \n    // ABN checksum validation\n    const weights = [10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19];\n    let sum = 0;\n    \n    for (let i = 0; i < 11; i++) {\n      sum += (parseInt(abn[i]) * weights[i]);\n    }\n    \n    return sum % 89 === 0;\n  },\n\n  // Validate password strength\n  validatePasswordStrength: (password) => {\n    const minLength = 8;\n    const hasUppercase = /[A-Z]/.test(password);\n    const hasLowercase = /[a-z]/.test(password);\n    const hasNumbers = /\\d/.test(password);\n    const hasSpecialChar = /[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]/.test(password);\n    \n    const score = [\n      password.length >= minLength,\n      hasUppercase,\n      hasLowercase,\n      hasNumbers,\n      hasSpecialChar\n    ].filter(Boolean).length;\n    \n    return {\n      isValid: score >= 3,\n      score,\n      requirements: {\n        minLength: password.length >= minLength,\n        hasUppercase,\n        hasLowercase,\n        hasNumbers,\n        hasSpecialChar\n      }\n    };\n  },\n};\n\n/**\n * Array utilities\n */\nexport const ArrayUtils = {\n  // Remove duplicates from array\n  unique: (arr) => [...new Set(arr)],\n\n  // Group array by property\n  groupBy: (arr, key) => {\n    return arr.reduce((groups, item) => {\n      const group = item[key];\n      groups[group] = groups[group] || [];\n      groups[group].push(item);\n      return groups;\n    }, {});\n  },\n\n  // Chunk array into smaller arrays\n  chunk: (arr, size) => {\n    const chunks = [];\n    for (let i = 0; i < arr.length; i += size) {\n      chunks.push(arr.slice(i, i + size));\n    }\n    return chunks;\n  },\n\n  // Shuffle array randomly\n  shuffle: (arr) => {\n    const shuffled = [...arr];\n    for (let i = shuffled.length - 1; i > 0; i--) {\n      const j = Math.floor(Math.random() * (i + 1));\n      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];\n    }\n    return shuffled;\n  },\n};\n\n/**\n * Object utilities\n */\nexport const ObjectUtils = {\n  // Deep clone object\n  deepClone: (obj) => {\n    if (obj === null || typeof obj !== 'object') return obj;\n    if (obj instanceof Date) return new Date(obj);\n    if (obj instanceof Array) return obj.map(item => ObjectUtils.deepClone(item));\n    if (typeof obj === 'object') {\n      const clonedObj = {};\n      for (const key in obj) {\n        if (obj.hasOwnProperty(key)) {\n          clonedObj[key] = ObjectUtils.deepClone(obj[key]);\n        }\n      }\n      return clonedObj;\n    }\n  },\n\n  // Remove null/undefined values from object\n  removeEmpty: (obj) => {\n    const cleaned = {};\n    for (const [key, value] of Object.entries(obj)) {\n      if (value !== null && value !== undefined && value !== '') {\n        cleaned[key] = typeof value === 'object' && !Array.isArray(value) \n          ? ObjectUtils.removeEmpty(value) \n          : value;\n      }\n    }\n    return cleaned;\n  },\n\n  // Get nested property safely\n  get: (obj, path, defaultValue = undefined) => {\n    const keys = path.split('.');\n    let result = obj;\n    \n    for (const key of keys) {\n      if (result === null || result === undefined || !(key in result)) {\n        return defaultValue;\n      }\n      result = result[key];\n    }\n    \n    return result;\n  },\n\n  // Set nested property\n  set: (obj, path, value) => {\n    const keys = path.split('.');\n    let current = obj;\n    \n    for (let i = 0; i < keys.length - 1; i++) {\n      const key = keys[i];\n      if (!(key in current) || typeof current[key] !== 'object') {\n        current[key] = {};\n      }\n      current = current[key];\n    }\n    \n    current[keys[keys.length - 1]] = value;\n    return obj;\n  },\n};\n\n/**\n * Number utilities\n */\nexport const NumberUtils = {\n  // Format number as currency (AUD)\n  formatCurrency: (amount, currency = 'AUD') => {\n    return new Intl.NumberFormat('en-AU', {\n      style: 'currency',\n      currency: currency,\n    }).format(amount);\n  },\n\n  // Format number with thousands separator\n  formatNumber: (num) => {\n    return new Intl.NumberFormat('en-AU').format(num);\n  },\n\n  // Generate random number in range\n  randomInRange: (min, max) => {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n  },\n\n  // Round to specified decimal places\n  roundTo: (num, decimals = 2) => {\n    return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);\n  },\n};\n\n/**\n * File utilities\n */\nexport const FileUtils = {\n  // Get file extension\n  getExtension: (filename) => {\n    return filename.split('.').pop().toLowerCase();\n  },\n\n  // Format file size\n  formatFileSize: (bytes) => {\n    if (bytes === 0) return '0 Bytes';\n    \n    const k = 1024;\n    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];\n    const i = Math.floor(Math.log(bytes) / Math.log(k));\n    \n    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];\n  },\n\n  // Check if file type is image\n  isImage: (filename) => {\n    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];\n    return imageExtensions.includes(FileUtils.getExtension(filename));\n  },\n\n  // Check if file type is document\n  isDocument: (filename) => {\n    const docExtensions = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'];\n    return docExtensions.includes(FileUtils.getExtension(filename));\n  },\n};\n\n/**\n * URL utilities\n */\nexport const UrlUtils = {\n  // Build URL with query parameters\n  buildUrl: (baseUrl, params = {}) => {\n    const url = new URL(baseUrl);\n    Object.keys(params).forEach(key => {\n      if (params[key] !== null && params[key] !== undefined) {\n        url.searchParams.append(key, params[key]);\n      }\n    });\n    return url.toString();\n  },\n\n  // Extract domain from URL\n  getDomain: (url) => {\n    try {\n      return new URL(url).hostname;\n    } catch {\n      return null;\n    }\n  },\n\n  // Check if URL is valid\n  isValidUrl: (url) => {\n    try {\n      new URL(url);\n      return true;\n    } catch {\n      return false;\n    }\n  },\n};\n\n/**\n * ID and UUID utilities\n */\nexport const IdUtils = {\n  // Generate UUID v4\n  generateUUID: () => uuidv4(),\n\n  // Generate short ID (8 characters)\n  generateShortId: () => {\n    return Math.random().toString(36).substr(2, 8);\n  },\n\n  // Generate numeric ID\n  generateNumericId: (length = 6) => {\n    return Math.random().toString().substr(2, length);\n  },\n};\n\n/**\n * Environment utilities\n */\nexport const EnvUtils = {\n  // Check if running in development\n  isDevelopment: () => process.env.NODE_ENV === 'development',\n\n  // Check if running in production\n  isProduction: () => process.env.NODE_ENV === 'production',\n\n  // Check if running in test environment\n  isTest: () => process.env.NODE_ENV === 'test',\n\n  // Get environment variable with default\n  getEnv: (key, defaultValue = null) => {\n    return process.env[key] || defaultValue;\n  },\n};\n\n/**\n * Error utilities\n */\nexport const ErrorUtils = {\n  // Create standardized error object\n  createError: (code, message, details = {}) => {\n    const error = new Error(message);\n    error.code = code;\n    error.details = details;\n    error.timestamp = new Date().toISOString();\n    return error;\n  },\n\n  // Check if error is operational (expected) vs programming error\n  isOperationalError: (error) => {\n    return error.isOperational === true;\n  },\n\n  // Serialize error for logging\n  serializeError: (error) => {\n    return {\n      name: error.name,\n      message: error.message,\n      stack: error.stack,\n      code: error.code,\n      details: error.details,\n      timestamp: error.timestamp || new Date().toISOString(),\n    };\n  },\n};\n\n/**\n * Retry utilities\n */\nexport const RetryUtils = {\n  // Retry async operation with exponential backoff\n  withRetry: async (operation, maxAttempts = 3, baseDelay = 1000) => {\n    let lastError;\n    \n    for (let attempt = 1; attempt <= maxAttempts; attempt++) {\n      try {\n        return await operation();\n      } catch (error) {\n        lastError = error;\n        \n        if (attempt === maxAttempts) {\n          throw error;\n        }\n        \n        // Exponential backoff: baseDelay * 2^(attempt-1)\n        const delay = baseDelay * Math.pow(2, attempt - 1);\n        await new Promise(resolve => setTimeout(resolve, delay));\n      }\n    }\n    \n    throw lastError;\n  },\n};\n\n// Export all utilities as default\nexport default {\n  StringUtils,\n  DateUtils,\n  ValidationUtils,\n  ArrayUtils,\n  ObjectUtils,\n  NumberUtils,\n  FileUtils,\n  UrlUtils,\n  IdUtils,\n  EnvUtils,\n  ErrorUtils,\n  RetryUtils,\n};
+import { v4 as uuidv4 } from 'uuid';
+import { ValidationPatterns } from '../types/index.js';
+
+/**
+ * String utilities
+ */
+export const StringUtils = {
+  // Generate a random string of specified length
+  generateRandomString: (length = 10) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  },
+
+  // Convert string to slug (URL-friendly)
+  toSlug: (str) => {
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove non-word chars
+      .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  },
+
+  // Capitalize first letter of each word
+  toTitleCase: (str) => {
+    return str.replace(/\w\S*/g, (txt) => 
+      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
+  },
+
+  // Truncate string with ellipsis
+  truncate: (str, maxLength = 100, suffix = '...') => {
+    if (str.length <= maxLength) return str;
+    return str.substr(0, maxLength - suffix.length) + suffix;
+  },
+
+  // Mask sensitive information (like email, phone)
+  maskEmail: (email) => {
+    const [localPart, domain] = email.split('@');
+    const maskedLocal = localPart.charAt(0) + '*'.repeat(localPart.length - 2) + localPart.slice(-1);
+    return `${maskedLocal}@${domain}`;
+  },
+
+  maskPhone: (phone) => {
+    return phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1****$3');
+  },
+};
+
+/**
+ * Date utilities
+ */
+export const DateUtils = {
+  // Format date to Australian format (DD/MM/YYYY)
+  formatAustralianDate: (date) => {
+    const d = new Date(date);
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+  },
+
+  // Get relative time (e.g., "2 hours ago")
+  getRelativeTime: (date) => {
+    const now = new Date();
+    const diff = now - new Date(date);
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    return 'Just now';
+  },
+
+  // Check if date is business day (Mon-Fri)
+  isBusinessDay: (date) => {
+    const day = new Date(date).getDay();
+    return day >= 1 && day <= 5;
+  },
+
+  // Add business days to a date
+  addBusinessDays: (date, days) => {
+    const result = new Date(date);
+    let addedDays = 0;
+    
+    while (addedDays < days) {
+      result.setDate(result.getDate() + 1);
+      if (DateUtils.isBusinessDay(result)) {
+        addedDays++;
+      }
+    }
+    
+    return result;
+  },
+};
+
+/**
+ * Validation utilities
+ */
+export const ValidationUtils = {
+  // Validate email format
+  isValidEmail: (email) => {
+    return ValidationPatterns.EMAIL.test(email);
+  },
+
+  // Validate Australian phone number
+  isValidAustralianPhone: (phone) => {
+    return ValidationPatterns.PHONE_AU.test(phone);
+  },
+
+  // Validate Australian postcode
+  isValidPostcode: (postcode) => {
+    return ValidationPatterns.POSTCODE_AU.test(postcode);
+  },
+
+  // Validate ABN (Australian Business Number)
+  isValidABN: (abn) => {
+    if (!ValidationPatterns.ABN.test(abn)) return false;
+    
+    // ABN checksum validation
+    const weights = [10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
+    let sum = 0;
+    
+    for (let i = 0; i < 11; i++) {
+      sum += (parseInt(abn[i]) * weights[i]);
+    }
+    
+    return sum % 89 === 0;
+  },
+
+  // Validate password strength
+  validatePasswordStrength: (password) => {
+    const minLength = 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    const score = [
+      password.length >= minLength,
+      hasUppercase,
+      hasLowercase,
+      hasNumbers,
+      hasSpecialChar
+    ].filter(Boolean).length;
+    
+    return {
+      isValid: score >= 3,
+      score,
+      requirements: {
+        minLength: password.length >= minLength,
+        hasUppercase,
+        hasLowercase,
+        hasNumbers,
+        hasSpecialChar
+      }
+    };
+  },
+};
+
+/**
+ * Array utilities
+ */
+export const ArrayUtils = {
+  // Remove duplicates from array
+  unique: (arr) => [...new Set(arr)],
+
+  // Group array by property
+  groupBy: (arr, key) => {
+    return arr.reduce((groups, item) => {
+      const group = item[key];
+      groups[group] = groups[group] || [];
+      groups[group].push(item);
+      return groups;
+    }, {});
+  },
+
+  // Chunk array into smaller arrays
+  chunk: (arr, size) => {
+    const chunks = [];
+    for (let i = 0; i < arr.length; i += size) {
+      chunks.push(arr.slice(i, i + size));
+    }
+    return chunks;
+  },
+
+  // Shuffle array randomly
+  shuffle: (arr) => {
+    const shuffled = [...arr];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  },
+};
+
+/**
+ * Object utilities
+ */
+export const ObjectUtils = {
+  // Deep clone object
+  deepClone: (obj) => {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (obj instanceof Date) return new Date(obj);
+    if (obj instanceof Array) return obj.map(item => ObjectUtils.deepClone(item));
+    if (typeof obj === 'object') {
+      const clonedObj = {};
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          clonedObj[key] = ObjectUtils.deepClone(obj[key]);
+        }
+      }
+      return clonedObj;
+    }
+  },
+
+  // Remove null/undefined values from object
+  removeEmpty: (obj) => {
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== null && value !== undefined && value !== '') {
+        cleaned[key] = typeof value === 'object' && !Array.isArray(value) 
+          ? ObjectUtils.removeEmpty(value) 
+          : value;
+      }
+    }
+    return cleaned;
+  },
+
+  // Get nested property safely
+  get: (obj, path, defaultValue = undefined) => {
+    const keys = path.split('.');
+    let result = obj;
+    
+    for (const key of keys) {
+      if (result === null || result === undefined || !(key in result)) {
+        return defaultValue;
+      }
+      result = result[key];
+    }
+    
+    return result;
+  },
+
+  // Set nested property
+  set: (obj, path, value) => {
+    const keys = path.split('.');
+    let current = obj;
+    
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!(key in current) || typeof current[key] !== 'object') {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+    
+    current[keys[keys.length - 1]] = value;
+    return obj;
+  },
+};
+
+/**
+ * Number utilities
+ */
+export const NumberUtils = {
+  // Format number as currency (AUD)
+  formatCurrency: (amount, currency = 'AUD') => {
+    return new Intl.NumberFormat('en-AU', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  },
+
+  // Format number with thousands separator
+  formatNumber: (num) => {
+    return new Intl.NumberFormat('en-AU').format(num);
+  },
+
+  // Generate random number in range
+  randomInRange: (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  },
+
+  // Round to specified decimal places
+  roundTo: (num, decimals = 2) => {
+    return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
+  },
+};
+
+/**
+ * File utilities
+ */
+export const FileUtils = {
+  // Get file extension
+  getExtension: (filename) => {
+    return filename.split('.').pop().toLowerCase();
+  },
+
+  // Format file size
+  formatFileSize: (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  },
+
+  // Check if file type is image
+  isImage: (filename) => {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    return imageExtensions.includes(FileUtils.getExtension(filename));
+  },
+
+  // Check if file type is document
+  isDocument: (filename) => {
+    const docExtensions = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'];
+    return docExtensions.includes(FileUtils.getExtension(filename));
+  },
+};
+
+/**
+ * URL utilities
+ */
+export const UrlUtils = {
+  // Build URL with query parameters
+  buildUrl: (baseUrl, params = {}) => {
+    const url = new URL(baseUrl);
+    Object.keys(params).forEach(key => {
+      if (params[key] !== null && params[key] !== undefined) {
+        url.searchParams.append(key, params[key]);
+      }
+    });
+    return url.toString();
+  },
+
+  // Extract domain from URL
+  getDomain: (url) => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return null;
+    }
+  },
+
+  // Check if URL is valid
+  isValidUrl: (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+};
+
+/**
+ * ID and UUID utilities
+ */
+export const IdUtils = {
+  // Generate UUID v4
+  generateUUID: () => uuidv4(),
+
+  // Generate short ID (8 characters)
+  generateShortId: () => {
+    return Math.random().toString(36).substr(2, 8);
+  },
+
+  // Generate numeric ID
+  generateNumericId: (length = 6) => {
+    return Math.random().toString().substr(2, length);
+  },
+};
+
+/**
+ * Environment utilities
+ */
+export const EnvUtils = {
+  // Check if running in development
+  isDevelopment: () => process.env.NODE_ENV === 'development',
+
+  // Check if running in production
+  isProduction: () => process.env.NODE_ENV === 'production',
+
+  // Check if running in test environment
+  isTest: () => process.env.NODE_ENV === 'test',
+
+  // Get environment variable with default
+  getEnv: (key, defaultValue = null) => {
+    return process.env[key] || defaultValue;
+  },
+};
+
+/**
+ * Error utilities
+ */
+export const ErrorUtils = {
+  // Create standardized error object
+  createError: (code, message, details = {}) => {
+    const error = new Error(message);
+    error.code = code;
+    error.details = details;
+    error.timestamp = new Date().toISOString();
+    return error;
+  },
+
+  // Check if error is operational (expected) vs programming error
+  isOperationalError: (error) => {
+    return error.isOperational === true;
+  },
+
+  // Serialize error for logging
+  serializeError: (error) => {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      details: error.details,
+      timestamp: error.timestamp || new Date().toISOString(),
+    };
+  },
+};
+
+/**
+ * Retry utilities
+ */
+export const RetryUtils = {
+  // Retry async operation with exponential backoff
+  withRetry: async (operation, maxAttempts = 3, baseDelay = 1000) => {
+    let lastError;
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        
+        if (attempt === maxAttempts) {
+          throw error;
+        }
+        
+        // Exponential backoff: baseDelay * 2^(attempt-1)
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    throw lastError;
+  },
+};
+
+// Export all utilities as default
+export default {
+  StringUtils,
+  DateUtils,
+  ValidationUtils,
+  ArrayUtils,
+  ObjectUtils,
+  NumberUtils,
+  FileUtils,
+  UrlUtils,
+  IdUtils,
+  EnvUtils,
+  ErrorUtils,
+  RetryUtils,
+};

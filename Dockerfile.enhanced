@@ -1,0 +1,177 @@
+# ============================================================================
+# RiggerShared - Enterprise-Grade Multi-Stage Dockerfile
+# Built for Tiation Technologies with ChaseWhiteRabbit NGO Standards
+# ============================================================================
+
+# Build Stage - Compile and package the application
+FROM node:20-alpine AS builder
+
+# Security: Create non-root user for build process
+RUN addgroup --system --gid 1001 rigger && \
+    adduser --system --uid 1001 --ingroup rigger rigger
+
+# Install build dependencies and security tools
+RUN apk add --no-cache \
+    build-base \
+    python3 \
+    python3-dev \
+    openjdk17-jdk \
+    curl \
+    git \
+    ca-certificates \
+    # Security tools
+    dumb-init \
+    su-exec
+
+WORKDIR /app
+
+# Copy package files first for better caching
+COPY package*.json ./
+COPY yarn.lock* ./
+
+# Install dependencies with security audit
+RUN npm ci --only=production --audit && \
+    npm audit fix --force || true
+
+# Copy source code with proper ownership
+COPY --chown=rigger:rigger . .
+
+# Build the application
+USER rigger
+RUN npm run build && \
+    npm run build:types && \
+    npm run build:docs && \
+    npm prune --production
+
+# ============================================================================
+# Production Stage - Minimal runtime image
+# ============================================================================
+FROM node:20-alpine AS production
+
+# Metadata labels for enterprise tracking
+LABEL maintainer="tiatheone@protonmail.com" \
+      org.opencontainers.image.title="RiggerShared" \
+      org.opencontainers.image.description="Shared libraries for Rigger ecosystem" \
+      org.opencontainers.image.vendor="Tiation Technologies" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.documentation="https://docs.rigger.dev/shared" \
+      org.opencontainers.image.source="https://github.com/tiation/RiggerShared" \
+      org.label-schema.schema-version="1.0" \
+      org.label-schema.build-date="${BUILD_DATE}" \
+      org.label-schema.vcs-ref="${VCS_REF}" \
+      org.label-schema.version="${VERSION}"
+
+# Install runtime dependencies and security updates
+RUN apk add --no-cache \
+    dumb-init \
+    curl \
+    ca-certificates && \
+    apk upgrade --no-cache && \
+    rm -rf /var/cache/apk/*
+
+# Create application user with minimal privileges
+RUN addgroup --system --gid 1001 rigger && \
+    adduser --system --uid 1001 --ingroup rigger rigger
+
+# Set working directory
+WORKDIR /app
+
+# Copy built application from builder stage
+COPY --from=builder --chown=rigger:rigger /app/dist ./dist
+COPY --from=builder --chown=rigger:rigger /app/node_modules ./node_modules
+COPY --from=builder --chown=rigger:rigger /app/package*.json ./
+COPY --from=builder --chown=rigger:rigger /app/docs ./docs
+
+# Create volume mount points
+RUN mkdir -p /app/logs /app/data && \
+    chown -R rigger:rigger /app/logs /app/data
+
+# Security: Set proper file permissions
+RUN chmod -R 755 /app && \
+    chmod -R 700 /app/logs /app/data
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-3000}/health || exit 1
+
+# Expose port (configurable via environment)
+EXPOSE ${PORT:-3000}
+
+# Use volumes for persistent data
+VOLUME ["/app/logs", "/app/data", "/app/dist"]
+
+# Security: Drop privileges and use non-root user
+USER rigger
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+
+# Default command with graceful shutdown support
+CMD ["npm", "run", "serve"]
+
+# ============================================================================
+# Development Stage - For local development with hot reload
+# ============================================================================
+FROM node:20-alpine AS development
+
+RUN addgroup --system --gid 1001 rigger && \
+    adduser --system --uid 1001 --ingroup rigger rigger
+
+# Install development tools
+RUN apk add --no-cache \
+    build-base \
+    python3 \
+    python3-dev \
+    git \
+    curl \
+    vim \
+    bash
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY yarn.lock* ./
+
+# Install all dependencies (including dev dependencies)
+RUN npm ci
+
+# Copy source code
+COPY --chown=rigger:rigger . .
+
+# Switch to non-root user
+USER rigger
+
+# Development command with hot reload
+CMD ["npm", "run", "dev"]
+
+# ============================================================================
+# Testing Stage - For running tests in CI/CD
+# ============================================================================
+FROM node:20-alpine AS testing
+
+RUN addgroup --system --gid 1001 rigger && \
+    adduser --system --uid 1001 --ingroup rigger rigger
+
+# Install testing dependencies
+RUN apk add --no-cache \
+    build-base \
+    python3 \
+    curl \
+    git \
+    chromium \
+    chromium-chromedriver
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+RUN npm ci
+
+# Copy source and test files
+COPY --chown=rigger:rigger . .
+
+USER rigger
+
+# Test command
+CMD ["npm", "run", "test:ci"]

@@ -1,4 +1,4 @@
-const winston = require('winston');
+import winston from 'winston';
 
 const logger = winston.createLogger({
     level: 'info',
@@ -18,10 +18,12 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
-module.exports = {
+const Logger = {
     info: (message, meta = {}) => logger.info(message, meta),
     error: (message, meta = {}) => logger.error(message, meta),
     warn: (message, meta = {}) => logger.warn(message, meta),
     debug: (message, meta = {}) => logger.debug(message, meta)
 };
+
+export default Logger;
 
