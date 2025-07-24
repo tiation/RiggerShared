@@ -1,0 +1,38 @@
+# Development and build files
+*.log
+.env*
+!.env.example
+coverage/
+test-results/
+node_modules/
+.DS_Store
+.vscode/
+.idea/
+
+# Source files (since we publish dist)
+src/
+examples/
+scripts/
+docs/
+__tests__/
+
+# Config files
+rollup.config.js
+jest.config.js
+.eslintrc.js
+.prettierrc
+.pa11yci.json
+tsconfig.json
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+docker-compose.yml
+Dockerfile
+
+# Git files
+.git/
+.gitignore
+
+# Only keep essential files for the published package
+# Keep: package.json, README.md, LICENSE, dist/

@@ -2,8 +2,22 @@
   "name": "@rigger/shared",
   "version": "1.0.0",
   "description": "Shared libraries and utilities for the Rigger ecosystem",
-  "main": "src/index.js",
+  "main": "dist/rigger-shared.cjs.js",
+  "module": "dist/rigger-shared.esm.js",
+  "browser": "dist/rigger-shared.umd.js",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/rigger-shared.esm.js",
+      "require": "./dist/rigger-shared.cjs.js",
+      "browser": "./dist/rigger-shared.umd.js"
+    }
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
@@ -39,6 +53,10 @@
     "prepare": "husky install",
     "release": "semantic-release",
     "package": "npm pack",
+    "prepublishOnly": "npm run clean && npm run build && npm run test",
+    "publish:dev": "npm publish --tag dev",
+    "publish:beta": "npm publish --tag beta",
+    "publish:latest": "npm publish",
     "clean": "rm -rf dist coverage test-results",
     "docker:build": "docker build -t riggershared .",
     "docker:run": "docker run -p 3000:3000 riggershared",
@@ -68,7 +86,9 @@
   },
   "devDependencies": {
     "eslint": "^8.0.0",
+    "husky": "^9.1.7",
     "jest": "^29.0.0",
+    "nodemon": "^3.1.10",
     "rollup": "^3.0.0"
   }
 }
