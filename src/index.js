@@ -11,6 +11,10 @@ export * from './constants/index.js';
 // Export all utilities
 export * from './utils/index.js';
 
+// Export API and shared libraries
+export * from './api';
+export * from './database';
+
 // Legacy utilities (keeping for backwards compatibility)
 export { default as Logger } from './utils/Logger.js';
 
