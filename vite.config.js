@@ -37,7 +37,12 @@ export default defineConfig({
         'joi',
         'zod',
         'uuid',
-        '@types/uuid'
+        '@types/uuid',
+        'module',
+        'fs',
+        'path',
+        'crypto',
+        'os'
       ],
       output: {
         // Provide global variables for UMD build
