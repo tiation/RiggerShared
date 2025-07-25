@@ -45,6 +45,7 @@ export default defineConfig({
         'os'
       ],
       output: {
+        exports: 'named',
         // Provide global variables for UMD build
         globals: {
           'axios': 'axios',
@@ -52,7 +53,12 @@ export default defineConfig({
           'winston': 'winston',
           'pino': 'pino',
           'joi': 'joi',
-          'zod': 'zod'
+          'zod': 'zod',
+          'module': 'module',
+          'path': 'path',
+          'fs': 'fs',
+          'crypto': 'crypto',
+          'os': 'os'
         }
       }
     }

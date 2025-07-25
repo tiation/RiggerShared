@@ -8,9 +8,9 @@
   "type": "module",
   "exports": {
     ".": {
+      "browser": "./dist/rigger-shared.umd.js",
       "import": "./dist/rigger-shared.esm.js",
-      "require": "./dist/rigger-shared.cjs.js",
-      "browser": "./dist/rigger-shared.umd.js"
+      "require": "./dist/rigger-shared.cjs.js"
     }
   },
   "files": [
