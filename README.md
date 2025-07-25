@@ -280,8 +280,7 @@ Supporting ChaseWhiteRabbit NGO's mission through:
 
 ### Development Team
 - 🔧 **Technical Lead**: tiatheone@protonmail.com
-- 🌐 **Enterprise Inquiries**: garrett@sxc.codes
-- 📧 **General Support**: garrett.dillman@gmail.com
+- 🌐 **Enterprise Inquiries**: jackjonas95@gmail.com
 
 ## 📧 Contact Information
 
