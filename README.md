@@ -5,6 +5,7 @@
 ### **A ChaseWhiteRabbit NGO Initiative**
 *Shared Libraries and Components for Rigger Ecosystem*
 
+[![GitLab CI/CD](https://gitlab.sxc.codes/tiation/RiggerShared/badges/main/pipeline.svg)](https://gitlab.sxc.codes/tiation/RiggerShared/-/pipelines)
 [![Build Status](https://github.com/tiation/RiggerShared/workflows/CI/badge.svg)](https://github.com/tiation/RiggerShared/actions)
 [![Security Rating](https://img.shields.io/badge/security-A+-brightgreen)](docs/security/)
 [![Ethics Compliance](https://img.shields.io/badge/ethics-compliant-blue)](docs/ethics/)
@@ -329,6 +330,52 @@ Together, they created this SaaS platform to:
 * Help connect riggers, doggers, and crane operators to real work opportunities.
 * Support better logistics, transparency, and compliance in the field.
 * Fund and sustain the good work being done by **ChaseWhiteRabbit** in disadvantaged communities.
+
+## 🌟 Project Vision: Empowering Industry Through Ethical Technology
+
+### How This Platform Serves Jack Jonas and the Rigging Industry
+
+RiggerShared provides the foundational shared libraries and components crucial for the interoperability and efficiency of the entire Rigger ecosystem. For industry specialists like Jack Jonas, these shared modules ensure:
+
+- **Consistent Worker Tools**: Harmonized libraries that provide a seamless experience across the RiggerConnect and RiggerHub platforms
+- **Optimized Resource Utilization**: Modular components that reduce duplication and enhance resource efficiency in dealing with diverse user interactions
+- **Scalable Development Practices**: Shared codebases that allow for rapid feature deployment and compliance with industry needs
+- **Standardized Compliance Methods**: Integrated libraries that automate and simplify adherence to safety standards and operational protocols
+- **Robust Interoperability**: Components designed to interlink smoothly with the wider Rigger platform apps and services
+
+### Supporting ChaseWhiteRabbit NGO's Charitable Mission
+
+Utilizing RiggerShared libraries across the ecosystem generates sustainable funding for ChaseWhiteRabbit NGO's charitable initiatives:
+
+- **Modular Impact**: Shared technology solutions free up resources, enabling investment in NGO initiatives focused on community growth and empowerment
+- **Code Reuse Efficiency**: Resource savings through shared solutions support broader NGO missions for workforce development and community empowerment
+- **Community Contributions**: Open-source shared code attracts contributions and fosters a community-driven improvement ecosystem, supporting NGO goals
+- **Equitable Technological Growth**: Platform stability through shared foundations supports educational programs promoting digital literacy and vocational proficiency
+- **Framework for Advocacy**: Revenue from shared technology efficiency is reinvested in policy work, enhancing worker protections and fair industry labor standards
+
+### Ethical, Accessible, and Worker-First Technology
+
+RiggerShared embodies ChaseWhiteRabbit NGO's commitment to a robust, scalable, and ethical foundation for blue-collar excellence:
+
+**🔍 Ethical by Design**
+- GPL v3 licensing ensures transparency and prevents proprietary exploitation of collaborative efforts and shared resources
+- Fair use of modular components ensures equitable resource distribution across platform applications
+- Privacy-first architectural patterns respecting user data and operational information security
+- Built-in safeguards in modular design protecting against algorithmic biases across all dependent applications
+
+**♿ Accessibility as a Core Value**
+- Shared components designed with accessibility at heart, supporting consistently accessible user interfaces across all platforms
+- Multi-language support infrastructure recognizing Australia's diverse workforce communities
+- Offline-capable shared libraries reflecting remote field usage requirements
+- Performance optimization for low-bandwidth and high-demand environments common in industrial settings
+
+**👷 Worker-Focused Philosophy**
+- Platform-level consistency ensures workers engage with familiar tools regardless of application within the ecosystem
+- Transparent contribution systems for workers and community members to suggest and participate in shared component development
+- Recognition systems incorporating peer and community feedback to shape the evolution of shared resources
+- Modular design that values practical usability and worker experience over technical complexity
+
+RiggerShared proves that a well-architected, enterprise-grade suite of shared tools can support business needs while empowering workers and contributing to social good, demonstrating that ethical technology practices foster resilience, efficiency, and scalability.
 
 ## 📧 Contact Information
 
